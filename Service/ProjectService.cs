@@ -13,13 +13,14 @@ namespace Service
     public class ProjectService : IProjectService
     {
         IProjectDAL _projectDAL;
-        IMemoryCache _memoryCache;
-        ProjectMapper _mapper = new ProjectMapper();
+        IProjectWorkItemsDAL _projectWorkItemsDAL;
+        //IMemoryCache _memoryCache;
 
-        public ProjectService(IProjectDAL projectDAL, IMemoryCache memoryCache)
+        public ProjectService(IProjectDAL projectDAL, IProjectWorkItemsDAL projectWorkItemsDAL)
         {
+            this._projectWorkItemsDAL = projectWorkItemsDAL;
             this._projectDAL = projectDAL;
-            this._memoryCache = memoryCache;
+            //this._memoryCache = memoryCache;
         }
         
         public async Task<IEnumerable<Project>> ReadAllAsync()
@@ -30,8 +31,9 @@ namespace Service
                 var _entities = await _projectDAL.ReadAllAsync();
                 foreach (var _entity in _entities)
                 {
-                    var _project = _mapper.MapObject(_entity);
+                    var _project = Mapper.Map<Project>(_entity);
                     _projects.Add(_project);
+                    _project.WorkItems = await GetProjectWorkitems(_entity.PartitionKey);
                 }
                 return _projects;
             }
@@ -46,7 +48,8 @@ namespace Service
             try
             {
                 ProjectEntity _entity = await _projectDAL.ReadOneAsync(primaryKey);
-                var _object = _mapper.MapObject(_entity);
+                var _object = Mapper.Map<Project>(_entity);
+                _object.WorkItems = await GetProjectWorkitems(_entity.PartitionKey);
                 return _object;
             }
             catch (Exception ex)
@@ -54,11 +57,24 @@ namespace Service
                 throw ex;
             }
         }
+
+        //Creates a new project
         public async Task CreateAsync(Project _object)
         {
             try
             {
-                ProjectEntity _entity = _mapper.MapEntity(_object);
+                //Map object to table entity
+                ProjectEntity _entity = Mapper.Map<ProjectEntity>(_object);
+                var id = await _projectDAL.GetHighest();
+                if (id == 0)
+                {
+                    //Set to base id: 00000
+                    id = 10000;
+                }
+                id++;
+                _entity.PartitionKey = id.ToString();
+                _entity.RepoId = Guid.NewGuid();
+
                 await _projectDAL.CreateAsync(_entity);
             }
             catch (Exception ex)
@@ -71,7 +87,7 @@ namespace Service
         {
              try
             {
-                ProjectEntity _entity = _mapper.MapEntity(_object);
+                ProjectEntity _entity = Mapper.Map<ProjectEntity>(_object);
                 await _projectDAL.UpdateAsync(_entity);
             }
             catch (Exception ex)
@@ -90,6 +106,18 @@ namespace Service
             {
                 throw ex;
             }
+        }
+
+        public async Task<List<string>> GetProjectWorkitems(string id)
+        {
+            List<string> _workItems = new List<string>();
+            var _entities = await _projectWorkItemsDAL.ReadById(id);
+            foreach(var _entity in _entities)
+            {
+                _workItems.Add(_entity.RowKey);
+            }
+            return _workItems;
+            
         }
     }
 }

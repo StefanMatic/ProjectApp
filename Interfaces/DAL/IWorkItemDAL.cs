@@ -2,7 +2,7 @@
 
 namespace Interfaces.DAL
 {
-    public interface IWorkItemDAL : IDALBase<WorkItemEntity>
+    public interface IWorkItemDAL : ITableDAL<WorkItemEntity>
     {
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Entities;
 
 namespace Entities.Models
 {
-    class User
+    public class User : UserBase
     {
+        public string Password { get; set; }
+        public string Token { get; set; }
     }
 }

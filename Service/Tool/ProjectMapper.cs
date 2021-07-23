@@ -17,7 +17,6 @@ namespace Service.Tool
                 Id = _entity.PartitionKey,
                 Name = _entity.RowKey,
                 Description = _entity.Description,
-                CodeId = _entity.CodeId,
                 State = _entity.State
             };
         }
@@ -28,9 +27,9 @@ namespace Service.Tool
                 PartitionKey = _object.Id,
                 RowKey = _object.Name,
                 Description = _object.Description,
-                CodeId = _object.CodeId,
                 State = _object.State
             };
         }
+
     }
 }

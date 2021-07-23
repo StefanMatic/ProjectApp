@@ -14,11 +14,12 @@ namespace WebAPI.Controllers
     [Route("api/v1/")]
     public class ProjectController : ControllerBase
     {
-        
+
         private readonly IProjectService _projectService;
         public ProjectController(IProjectService projectService)
         {
-            _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService)); ;
+            _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+            
         }
 
        [HttpPost("Project")]
@@ -38,7 +39,14 @@ namespace WebAPI.Controllers
         [HttpGet("Projects")]
         public async Task<IActionResult> GetAllProjects()
         {
-            return Ok(await _projectService.ReadAllAsync());
+            try
+            {
+                return Ok(await _projectService.ReadAllAsync());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error. Message: {ex.Message}");
+            }
         }
         
         [HttpGet("Projects/{id}")]

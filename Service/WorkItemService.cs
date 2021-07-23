@@ -15,7 +15,6 @@ namespace Service
     {
         IWorkItemDAL _workItemDAL;
         IMemoryCache _memoryCache;
-        IMapper<WorkItem,WorkItemEntity> _mapper = new WorkItemMapper();
 
         public WorkItemService(IWorkItemDAL workItemDAL, IMemoryCache memoryCache)
         {
@@ -31,7 +30,7 @@ namespace Service
                 var _entities = await _workItemDAL.ReadAllAsync();
                 foreach (var _entity in _entities)
                 {
-                    var _object = _mapper.MapObject(_entity);
+                    var _object = Mapper.Map<WorkItem>(_entity);
                     _workItems.Add(_object);
                 }
                 return _workItems;
@@ -47,7 +46,7 @@ namespace Service
             try
             {
                 WorkItemEntity _entity = await _workItemDAL.ReadOneAsync(primaryKey);
-                var _object = _mapper.MapObject(_entity);
+                var _object = Mapper.Map<WorkItem>(_entity);
                 return _object;
             }
             catch (Exception ex)
@@ -59,7 +58,7 @@ namespace Service
         {
             try
             {
-                WorkItemEntity _entity = _mapper.MapEntity(_object);
+                WorkItemEntity _entity = Mapper.Map<WorkItemEntity>(_object);
                 await _workItemDAL.CreateAsync(_entity);
             }
             catch (Exception ex)
@@ -72,7 +71,7 @@ namespace Service
         {
             try
             {
-                WorkItemEntity _entity = _mapper.MapEntity(_object);
+                WorkItemEntity _entity = Mapper.Map<WorkItemEntity>(_object);
                 await _workItemDAL.UpdateAsync(_entity);
             }
             catch (Exception ex)

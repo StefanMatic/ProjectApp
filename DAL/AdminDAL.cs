@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using DAL.Azure;
+using DAL.Connection;
 
 namespace DAL
 {
